@@ -29,7 +29,7 @@ open class LiquidGlassSlider: UIControl {
                 updateTrackFill()
             }
             
-            if isContinuous || !isDragging {
+            if isUpdatingValueProgrammatically, isContinuous || !isDragging {
                 sendActions(for: .valueChanged)
             }
         }
@@ -303,6 +303,9 @@ open class LiquidGlassSlider: UIControl {
         contractedThumbView.frame = CGRect(x: 0, y: 0, width: contractedThumbWidth, height: contractedThumbHeight)
         contractedThumbView.layer.cornerRadius = contractedThumbHeight / 2
         contractedThumbView.backgroundColor = resolvedContractedThumbColor
+        contractedThumbView.layer.shadowOpacity = 0.15
+        contractedThumbView.layer.shadowRadius = 5
+        contractedThumbView.layer.shadowOffset = .zero
         contractedThumbView.isUserInteractionEnabled = false
         addSubview(contractedThumbView)
         
@@ -369,14 +372,14 @@ open class LiquidGlassSlider: UIControl {
         let centerY = bounds.height / 2
         
         // Apply rubber-band effect: move track horizontally with thumb and shrink vertically
-        let trackHorizontalOffset = rubberBandOffset
-        let rubberBandTrackHeightShrink = abs(rubberBandOffset) * 0.3
+        let trackHorizontalOffset = rubberBandOffset / 4 * 3 - abs(rubberBandOffset) / 4
+        let rubberBandTrackHeightShrink = abs(rubberBandOffset) / 3
         let effectiveTrackHeight = max(2, trackHeight - rubberBandTrackHeightShrink)
         
         trackView.frame = CGRect(
             x: trackMinX + trackHorizontalOffset,
             y: centerY - effectiveTrackHeight / 2,
-            width: trackWidth,
+            width: trackWidth + abs(rubberBandOffset) / 2,
             height: effectiveTrackHeight
         )
         trackView.layer.cornerRadius = effectiveTrackHeight / 2
@@ -711,11 +714,7 @@ open class LiquidGlassSlider: UIControl {
         isUpdatingValueProgrammatically = true
         value = newValue
         isUpdatingValueProgrammatically = false
-        
-        if isContinuous {
-            sendActions(for: .valueChanged)
-        }
-        
+
         // Check for edge haptics
         checkForEdgeHaptics(at: newCenterX)
     }
@@ -755,8 +754,6 @@ open class LiquidGlassSlider: UIControl {
             // Finish drag
             finishDrag()
         }
-        
-        sendActions(for: .valueChanged)
     }
     
     open override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {

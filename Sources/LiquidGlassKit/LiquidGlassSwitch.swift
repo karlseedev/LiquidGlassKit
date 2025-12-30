@@ -25,8 +25,6 @@ open class LiquidGlassSwitch: UIControl {
                 updateTrackColor(animated: false)
                 updateThumbPosition(animated: false)
             }
-            
-            sendActions(for: .valueChanged)
         }
     }
     
@@ -98,6 +96,9 @@ open class LiquidGlassSwitch: UIControl {
     /// Whether a toggle occurred during the current drag gesture.
     private var didToggleDuringDrag = false
     
+    /// Whether a toggle was in the on state when drag started.
+    private var wasOnWhenDragStarted = false
+
     /// Flag to prevent redundant visual updates when setOn is handling them.
     private var isUpdatingStateProgrammatically = false
 
@@ -184,7 +185,7 @@ open class LiquidGlassSwitch: UIControl {
     // MARK: - Initialization
     
     public override init(frame: CGRect) {
-        super.init(frame: frame)
+        super.init(frame: .init(origin: frame.origin, size: .init(width: switchWidth, height: switchHeight)))
         commonInit()
     }
     
@@ -246,11 +247,16 @@ open class LiquidGlassSwitch: UIControl {
     // MARK: - Layout
     
     open override var intrinsicContentSize: CGSize {
-        CGSize(width: switchWidth, height: switchHeight)
+        .init(width: switchWidth, height: switchHeight)
     }
 
     open override func sizeThatFits(_ size: CGSize) -> CGSize {
         intrinsicContentSize
+    }
+
+    open override var frame: CGRect {
+        get { super.frame }
+        set { super.frame = .init(origin: newValue.origin, size: intrinsicContentSize) }
     }
 
     // MARK: - Public Methods (UISwitch Interface)
@@ -431,6 +437,7 @@ open class LiquidGlassSwitch: UIControl {
         
         // Begin interaction (not a drag yet; will distinguish tap vs drag by time)
         isDragging = false
+        wasOnWhenDragStarted = isOn
         didToggleDuringDrag = false
         touchBeganTime = CACurrentMediaTime()
         dragStartLocation = touch.location(in: self).x
@@ -452,7 +459,7 @@ open class LiquidGlassSwitch: UIControl {
         if !isDragging && touchDuration >= tapTimeThreshold {
             isDragging = true
         }
-        
+
         // Process movement regardless of drag state
         let currentX = touch.location(in: self).x
         let translation = currentX - dragStartLocation
@@ -479,7 +486,8 @@ open class LiquidGlassSwitch: UIControl {
             isUpdatingStateProgrammatically = true
             isOn.toggle()
             isUpdatingStateProgrammatically = false
-            
+            sendActions(for: .valueChanged)
+
             performToggleAnimation()
         } else {
             // Time threshold exceeded - finish as a drag (regardless of actual movement)
@@ -541,13 +549,17 @@ open class LiquidGlassSwitch: UIControl {
             isUpdatingStateProgrammatically = true
             isOn.toggle()
             isUpdatingStateProgrammatically = false
-            
+            sendActions(for: .valueChanged)
+
             updateTrackColor(animated: true)
         }
-        
+
         // End drag state
         isDragging = false
-        
+        if isOn != wasOnWhenDragStarted {
+            sendActions(for: .valueChanged)
+        }
+
         // Animate thumb back to its final position first (so it's visibly sliding), then contract.
         self.contractThumb(animated: true)
         updateThumbPosition(animated: true)
