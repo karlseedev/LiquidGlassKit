@@ -23,7 +23,7 @@ The core rendering engine that produces the liquid glass effect using Metal shad
 The view utilizes `CABackdropLayer` and a zero-copy bridge to efficiently capture and process background content.
 
 > [!WARNING]
-> The LiquidGlassKit also includes an App Store-safe alternative background capture method that relies solely on public APIs. This approach uses root view rendering instead of the private CABackdropLayer, making it more CPU-intensive while preserving the full liquid glass effect.
+> The LiquidGlassKit also includes an App Store-safe alternative background capture method that relies solely on public APIs. This approach uses root view rendering instead of the private CABackdropLayer, making it more CPU-intensive while preserving the full liquid glass effect. Starting with iOS 26.2, this is the only working method and is used automatically.
 
 ### LiquidLensView
 

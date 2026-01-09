@@ -276,8 +276,11 @@ final class LiquidGlassView: MTKView {
     // MARK: - Background Capture
 
     func captureBackground() {
-//        captureRootView()
-        captureBackdrop()
+        if #available(iOS 26.2, *) {
+            captureRootView()
+        } else {
+            captureBackdrop()
+        }
     }
 
     /// Captures the background content via root View using (presentation) Layer render.
