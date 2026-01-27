@@ -26,10 +26,16 @@ public class LiquidGlassEffectView: UIView, AnyVisualEffectView {
 
         super.init(frame: .zero)
 
-        let liquidGlassView = LiquidGlassView(effect.style.liquidGlass)
+        // effect.tintColor가 설정되어 있으면 liquidGlass의 tintColor를 덮어씌움
+        var liquidGlass = effect.style.liquidGlass
+        if let tintColor = effect.tintColor {
+            liquidGlass.tintColor = tintColor
+        }
+
+        let liquidGlassView = LiquidGlassView(liquidGlass)
         addSubview(liquidGlassView)
         self.liquidGlassView = liquidGlassView
-        
+
         setupContentView()
     }
 
