@@ -221,7 +221,7 @@ final class LiquidGlassView: MTKView {
 
     /// Whether to automatically capture superview on each frame. 
     /// Set to false for manual control via `captureBackground()`.
-    var autoCapture: Bool = true
+    public var autoCapture: Bool = true
 
     var touchPoint: CGPoint? = nil
 
