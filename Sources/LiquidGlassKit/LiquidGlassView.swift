@@ -208,7 +208,7 @@ final class LiquidGlassRenderer {
     }
 }
 
-final class LiquidGlassView: MTKView {
+public final class LiquidGlassView: MTKView {
 
     let liquidGlass: LiquidGlass
 
